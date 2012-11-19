@@ -1,0 +1,563 @@
+HOST: http://learn.my-company.com/api
+
+--- Learndot API V 1.0 ---
+---
+Welcome to the Learndot API documentation. This document is in the very early alpha stages and will be evolving quickly, check back often. 
+---
+
+--
+Login 
+The following is the list of actions for access control (logging in and out)
+--
+
+Gets the currently logged in user
+GET /login
+< 200
+< Content-Type: application/json
+{ 
+    "loggedIn": true, 
+    "sessionString":sessionToken, 
+    "user": userObject
+}
+
+Logs the user into the service
+POST /login
+> Content-Type: application/json
+{ 
+    "email":"myUser@myorganization", 
+    "password": "myPassword", 
+    "organizationId": yourOrgId, 
+    "preserveLogin": true  
+}
+< 200
+< Content-Type: application/json
+{
+    "loggedIn":true,
+    "sessionString":sessionToken, 
+    "user": userObject
+}
+
+Removes the currently logged in user
+DELETE /login
+> Content-Type: application/json
+< 200
+< Content-Type: application/json
+{ 
+    "loggedIn": false, 
+    user: null
+}
+
+--
+Organizations
+Organizations are the highest organizational component in the learndot system, currently they agregate all of the courses being offered by an organization, as well as the users attached to the organization.
+--
+
+GET /organization/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+	"createdOn": "2012-09-17T01:48:23-0500",
+	"updatedOn": "2012-09-20T11:54:05-0500"
+    "name": "My Organization",
+	"appName": "My Organization University",
+	"welcomeMessage": "Welcome to My Organization University, there's lots for you to learn here.",
+	"hostUrl": "learn.my-company.com",
+	"courseIds": [],
+	"userIds": [],
+	"adminIds": [],
+	"role": "Admin",
+	"organizationPictureUrl": "",
+    ]
+}
+
+--
+Courses
+Courses are the largest granularity learning module, they aggregate concepts, course authors /admins, and concepts.
+--
+
+Retrieves all of the courses available in an organization by the current user.
+GET /courses?organizationId=1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+ [ {
+    "id": 50,
+    "createdOn": "2012-11-16T13:02:23-0600",
+	"updatedOn": "2012-11-16T14:05:23-0600",
+    "name": "My Fantastic Course",
+	"description": "Description of the course"
+	"organizationId": 1,
+	"studentIds": [],
+	"instructorIds": [],
+	"scheduledIds": [],
+	"conceptIds": [],
+	"role": "User",
+	"isComplete": false,
+	"inProgress": false,
+	"coursePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/69bb163d-d5ef-4c0c-a0cd-769266cbb6be"
+} ]
+
+
+Retrieves a course by id.
+GET /courses/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+    "createdOn": "2012-11-16T13:02:23-0600",
+    "updatedOn": "2012-11-16T14:05:23-0600",
+    "name": "My Fantastic Course",
+	"description": "Description of the course"
+	"organizationId": 1,
+	"studentIds": [],
+	"instructorIds": [],
+	"scheduledIds": [],
+	"conceptIds": [],
+	"role": "User",
+	"isComplete": false,
+	"inProgress": false,
+	"coursePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/69bb163d-d5ef-4c0c-a0cd-769266cbb6be"
+}
+
+
+Creates a course - Organization role of the user must be at Admin or higher.
+POST /courses
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "name": "My Fantastic Course",
+    "description": "Description of the course"
+    "organizationId": 1,
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-11-16T13:02:23-0600",
+    "updatedOn": "2012-11-16T14:05:23-0600",
+    "name": "My Fantastic Course",
+    "description": "Description of the course"
+	"organizationId": 1,
+	"studentIds": [],
+	"instructorIds": [],
+	"scheduledIds": [],
+	"conceptIds": [],
+	"role": "User",
+	"isComplete": false,
+	"inProgress": false,
+	"coursePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/69bb163d-d5ef-4c0c-a0cd-769266cbb6be"
+}
+
+Updates an existing course - Organization role of the user must be at admin or higher.
+PUT /courses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "name": "My New Name",
+    "description": "My New Description"
+    "organizationId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-11-16T13:02:23-0600",
+    "updatedOn": "2012-11-16T14:05:23-0600",
+    "name": "My New Name",
+    "description": "My New Description"
+    "organizationId": 1,
+	"studentIds": [],
+	"instructorIds": [],
+	"scheduledIds": [],
+	"conceptIds": [],
+	"role": "User",
+	"isComplete": false,
+	"inProgress": false,
+	"coursePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/69bb163d-d5ef-4c0c-a0cd-769266cbb6be"
+}
+
+Deletes an existing course - note these are HARD deletes, your data will be lost.
+DELETE /courses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+{
+    "status": "Ok",
+    "message": "Object succesfully destroyed"   
+}
+
+
+--
+Concepts
+Concepts are the smallest granularity learning module, they are related to other concepts via a directed dependency graph.
+--
+
+Retrieves all of the concepts contained in the specified course
+GET /concepts?courseId=1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 31,
+	"createdOn": "2012-09-17T01:48:23-0500",
+	"updatedOn": "2012-09-17T01:48:23-0500",
+	"name": "Overview",
+	"description": "Concept Description",
+	"isExam": false,
+	"courseIds": [ 7 ],
+	"dependencyIds": [],
+	"dependentIds": [],
+	"fileIds": [],
+	"freeFormQuestionIds": [ ],
+	"isLocked": false,
+	"isCompleted": true,
+	"isRead": true
+}
+
+Retrieves the concept at the given id
+GET /concepts/31
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 31,
+    "createdOn": "2012-09-17T01:48:23-0500",
+	"updatedOn": "2012-09-17T01:48:23-0500",
+	"name": "Overview",
+	"description": "Concept Content",
+	"isExam": false,
+	"courseIds": [ 7 ],
+	"dependencyIds": [],
+	"dependentIds": [],
+	"fileIds": [],
+	"freeFormQuestionIds": [ ],
+	"isLocked": false,
+	"isCompleted": true,
+	"isRead": true
+}
+
+Creates a concept - Must be a course, organization, or global admin.
+POST /concepts
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "name": "My Fantastic Concept",
+    "description": "Concept Content"
+    "courseIds": [ 1 ],
+    "dependencyIds": [],
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 31,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+	"name": "My Fantastic Concept",
+	"description": "Concept Content",
+	"isExam": false,
+	"courseIds": [ 1 ],
+	"dependencyIds": [],
+	"dependentIds": [],
+	"fileIds": [],
+	"freeFormQuestionIds": [],
+	"isLocked": false,
+	"isCompleted": true,
+	"isRead": true
+}
+
+Updates a concept - Must be a course, organization, or global admin.
+PUT /concepts/31
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "name": "My Fantastically Updated Concept",
+    "description": "Concept Content"
+    "courseIds": [ 1 ],
+    "dependencyIds": [],
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 31,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "name": "My Fantastically Updated Concept",
+	"description": "Concept Content",
+	"isExam": false,
+	"courseIds": [ 1 ],
+	"dependencyIds": [],
+	"dependentIds": [],
+	"fileIds": [],
+	"freeFormQuestionIds": [],
+	"isLocked": false,
+	"isCompleted": true,
+	"isRead": true
+}
+
+Deletes an existing concept - Must be a course, organization, or global admin. - note these are HARD deletes, your data will be lost.
+DELETE /concepts/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+{
+    "status": "Ok",
+    "message": "Object succesfully destroyed"   
+}
+
+--
+Self Assesment Responses
+SASs are the basic response for non exam concepts, they provide a rating from 1-10 on the learner's confidence with the material.
+--
+
+GET /selfAssesmentResponses?conceptId=1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+[
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "rating": 9,
+    "conceptId": 1,
+    "userId": 1
+}
+]
+
+GET /selfAssesmentResponses/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "rating": 9,
+    "conceptId": 1,
+	"userId": 1
+}
+
+
+
+POST /selfAssesmentResponses
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "rating": 9,
+    "conceptId": 1,
+	"userId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "rating": 9,
+    "conceptId": 1,
+	"userId": 1
+}
+
+PUT /selfAssesmentResponses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "rating": 5,
+    "conceptId": 1,
+	"userId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "rating": 5,
+    "conceptId": 1,
+	"userId": 1
+}
+
+Deletes an existing Free Form response and all of it's reponses - note these are HARD deletes, your data will be lost.
+DELETE /selfAssesmentResponses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+{
+    "status": "Ok",
+    "message": "Object succesfully destroyed"   
+}
+
+--
+Free Form Questions
+--
+
+
+GET /freeFormQuestions?conceptId=1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+[
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "question": "Why is important to pay attention to all the variables in the espresso making process?",
+    "conceptId": 1,
+    "responseIds": []
+}
+]
+
+GET /freeFormQuestions/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "question": "Why is important to pay attention to all the variables in the espresso making process?",
+    "conceptId": 1,
+    "responseIds": []
+}
+
+
+POST /freeFormQuestions
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "question": "Why is the sky blue?",
+    "conceptId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "question": "Why is the sky blue?",
+    "conceptId": 1,
+    "responseIds": []
+}
+
+PUT /freeFormQuestions/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "question": "Why is the sky blue? Updated!",
+    "conceptId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "question": "Why is the sky blue? Updated!",
+    "conceptId": 1,
+    "responseIds": []
+}
+
+Deletes an existing Free Form Question and all of it's reponses - note these are HARD deletes, your data will be lost.
+DELETE /freeFormQuestions/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+{
+    "status": "Ok",
+    "message": "Object succesfully destroyed"   
+}
+
+--
+Free Form Responses
+--
+
+GET /freeFormResponses?questionId=1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+[
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "response": "Because espresso is great!",
+    "questionId": 1,
+    "userId": 1
+}
+]
+
+GET /freeFormResponses/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "response": "Because espresso is great!",
+    "questionId": 1,
+	"userId": 1
+}
+
+
+POST /freeFormResponses
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "response": "My response",
+    "questionId": 1,
+	"userId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "response": "My response",
+    "questionId": 1,
+	"userId": 1
+}
+
+PUT /freeFormResponses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+    "response": "My response updated",
+    "questionId": 1,
+	"userId": 1
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 2,
+    "createdOn": "2012-09-17T01:48:23-0500",
+    "updatedOn": "2012-09-17T01:48:23-0500",
+    "response": "My response updated",
+    "questionId": 1,
+	"userId": 1
+}
+
+Deletes an existing Free Form response and all of it's reponses - note these are HARD deletes, your data will be lost.
+DELETE /freeFormResponses/2
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+{
+    "status": "Ok",
+    "message": "Object succesfully destroyed"   
+}

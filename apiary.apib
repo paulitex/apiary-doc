@@ -567,7 +567,7 @@ DELETE /freeFormResponses/2
 Managing Users
 --
 
-Get users based on course 
+Index users based on course 
 GET /users?courseId=1
 > Content-Type: application/json
 > Cookie: MatygoSession=<mySessionToken>;
@@ -589,7 +589,7 @@ GET /users?courseId=1
 }
 ]
 
-Get users based on organization 
+Index users based on organization 
 GET /users?organizationId=1
 > Content-Type: application/json
 > Cookie: MatygoSession=<mySessionToken>;
@@ -611,3 +611,79 @@ GET /users?organizationId=1
 }
 ]
 
+Show a single user 
+GET /users/1
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+< 200
+< Content-Type: application/json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@learndot.com",
+  "profilePictureId": 76,
+  "isAdmin": true,
+  "resetPasswordToken": "E2IKr8SISHqm1tNrEhKykQ",
+  "profilePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/4fc650b1-15c1-454b-9622-c1b220ab778f",
+  "isPendingAccept": false,
+  "id": 1,
+  "createdOn": "2012-09-17T01:48:20-0500",
+  "updatedOn": "2012-10-13T01:33:58-0500",
+}
+
+Create user(s)
+POST /users
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+[
+{
+  "email": "john@learndot.com",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+]
+< 200
+< Content-Type: application/json
+[
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@learndot.com",
+  "profilePictureId": 76,
+  "isAdmin": true,
+  "resetPasswordToken": "E2IKr8SISHqm1tNrEhKykQ",
+  "profilePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/4fc650b1-15c1-454b-9622-c1b220ab778f",
+  "isPendingAccept": false,
+  "id": 1,
+  "createdOn": "2012-09-17T01:48:20-0500",
+  "updatedOn": "2012-10-13T01:33:58-0500",
+}
+]
+
+Update user
+PUT /users
+> Content-Type: application/json
+> Cookie: MatygoSession=<mySessionToken>;
+{
+  "email": "john@learndot.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "password": "asdf1234"
+}
+< 200
+< Content-Type: application/json
+[
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@learndot.com",
+  "profilePictureId": 76,
+  "isAdmin": true,
+  "resetPasswordToken": "E2IKr8SISHqm1tNrEhKykQ",
+  "profilePictureUrl": "https://unicorn-api.s3.amazonaws.com/uploads-prod/4fc650b1-15c1-454b-9622-c1b220ab778f",
+  "isPendingAccept": false,
+  "id": 1,
+  "createdOn": "2012-09-17T01:48:20-0500",
+  "updatedOn": "2012-10-13T01:33:58-0500",
+}
+]
